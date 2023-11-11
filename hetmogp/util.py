@@ -95,7 +95,7 @@ def random_W_kappas(Q,D,rank, experiment=False):
     for q in range(Q):
         p = np.random.binomial(n=1, p=0.5*np.ones((D,1)))
         Ws = p*np.random.normal(loc=0.5, scale=0.5, size=(D,1)) - (p-1)*np.random.normal(loc=-0.5, scale=0.5, size=(D,1))
-        W_list.append(Ws / np.sqrt(rank)) # deberían ser tanto positivos como negativos
+        W_list.append(Ws / np.sqrt(rank)) # deberian ser tanto positivos como negativos
         if experiment:
             kappa_list.append(np.zeros(D))
         else:

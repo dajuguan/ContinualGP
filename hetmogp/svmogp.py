@@ -285,7 +285,7 @@ class SVMOGP(GPy.core.SparseGP):
         if kern_list is None:
             kern_list = self.kern_list
 
-        Xmulti_all_new = self.Xmulti_all.copy()
+        Xmulti_all_new = self.Xmulti_all[:]
         Xmulti_all_new[f_ind[d]] = Xnew
 
         posteriors_F = self.inference_method.inference(q_u_means=self.q_u_means,

@@ -3,8 +3,8 @@
 
 import numpy as np
 import GPy
-from continualgp.util import draw_mini_slices
-from continualgp.continualgp_inf import ContinualGPInf
+from util import draw_mini_slices
+from continualgp_inf import ContinualGPInf
 from GPy.core.parameterization.param import Param
 from GPy.plotting.matplot_dep.util import fixed_inputs
 import matplotlib.pyplot as plt
@@ -70,7 +70,7 @@ class ContinualGP(GPy.core.SparseGP):
 
         _, self.B_list = util.LCM(input_dim=self.Xdim, output_dim=self.num_output_funcs, rank=1, kernels_list=self.kern_list,
                                   W_list=self.W_list, kappa_list=self.kappa_list)
-        self.B_list_old = self.B_list.copy() # provisional
+        self.B_list_old = self.B_list[:] # provisional
 
         # Set-up optimization parameters: [Z, m_u, L_u]
         self.q_u_means = Param('m_u', 2.5*np.random.randn(self.num_inducing, self.num_latent_funcs) +
@@ -98,6 +98,9 @@ class ContinualGP(GPy.core.SparseGP):
     def log_likelihood(self):
         return self._log_marginal_likelihood
 
+    # Method that is called upon any changes to Param variables within the model. 
+    # In particular in the GP class this method re-performs inference, 
+    # recalculating the posterior and log marginal likelihood and gradients of the model
     def parameters_changed(self):
         f_index = self.Y_metadata['function_index'].flatten()
         d_index = self.Y_metadata['d_index'].flatten()
@@ -270,7 +273,7 @@ class ContinualGP(GPy.core.SparseGP):
         if kern_list is None:
             kern_list = self.kern_list
 
-        Xmulti_all_new = self.Xmulti_all.copy()
+        Xmulti_all_new = self.Xmulti_all[:]
         Xmulti_all_new[f_ind[d]] = Xnew
 
         posteriors_F = self.inference_method.inference(q_u_means=self.q_u_means, q_u_chols=self.q_u_chols, X=Xmulti_all_new, Y=self.Ymulti_all, Z=self.Z,

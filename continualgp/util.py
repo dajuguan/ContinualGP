@@ -1,3 +1,4 @@
+#coding=utf-8
 # Copyright (c) 2019 Pablo Moreno-Munoz
 # Universidad Carlos III de Madrid and University of Sheffield
 
@@ -243,11 +244,16 @@ def conditional_prior(Z, Zold, kern_list_old, phi_means, phi_chols):
     Kuu_cond = latent_funs_conditional(Z, Zold, kern_list_old)
 
     for q, kern in enumerate(kern_list_old):
-        R, _ = linalg.dpotrs(np.asfortranarray(Luu_old[q, :, :]), Kuu_cond[q, :, :].T)
+        # DPOTRS solves a system of linear equations A*X = B with a symmetric
+        # positive definite matrix A using the Cholesky factorization
+        R, _ = linalg.dpotrs(np.asfortranarray(Luu_old[q, :, :]), Kuu_cond[q, :, :].T) # R = Luui * Kuu_cond
         Auu = R.T # Kuu_cond * Kuui
         Mu[q, :] = np.dot(Auu, phi_means[:, q, None])
         Kuu[q, :, :] = Kuu_new[q, :, :] + np.dot(np.dot(R.T, phi_S[q, :, :]), R) - np.dot(Kuu_cond[q, :, :], R)
+        # compute Cholesky factorization using jitter
         Luu[q, :, :] = linalg.jitchol(Kuu[q, :, :])
+        # Compute the inverse of a real symmetric positive definite matrix A 
+        # using the Cholesky factorization computed by dpotrf/jitchol
         Kuui[q, :, :], _ = linalg.dpotri(np.asfortranarray(Luu[q, :, :]))
     return Mu, Kuu, Luu, Kuui
 
@@ -449,7 +455,7 @@ def vem_algorithm(model, vem_iters=None, maxIter_perVEM = None, step_rate=None ,
     return model
 
 def plot_streaming_figures_experiment1_latex(model_list, Xtrain_list, Xtest_list, Ytrain_list, Ytest_list):
-    plt.rc('text', usetex=True)
+    plt.rc('text', usetex=False)
     plt.rc('font', family='serif')
 
     # First BATCH
@@ -590,7 +596,7 @@ def plot_streaming_figures_experiment1_latex(model_list, Xtrain_list, Xtest_list
 
 # SINGLE OUTPUT (SO)
 def plot_streaming_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, q_mean_list, save=False):
-    plt.rc('text', usetex=True)
+    plt.rc('text', usetex=False)
     plt.rc('font', family='serif')
 
     lik_noise = 1.5
@@ -604,7 +610,7 @@ def plot_streaming_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points,
         m_pred_gp_upper_new = m_pred_new + 2 * np.sqrt(v_pred_new) + lik_noise
         m_pred_gp_lower_new = m_pred_new - 2 * np.sqrt(v_pred_new) - lik_noise
 
-        fig_batch = plt.figure(figsize=(12, 4))
+        # fig_batch = plt.figure(figsize=(12, 4))
 
         if t>0:
             for t_past in range(t):
@@ -634,13 +640,14 @@ def plot_streaming_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points,
         plt.xlabel(r'Real Inputs')
 
         if save:
-            tikz_save('so_gpr_streaming_t'+str(t+1)+'.tex')
-
-        plt.show()
+            # tikz_save('so_gpr_streaming_t'+str(t+1)+'.tex')
+            pass
+        plt.savefig('../images/so_gpr_streaming_t'+str(t+1)+'.png')
+        # plt.show()
 
 # MULTI-OUTPUT (MO)
 def plot_multioutput_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, q_mean_list, save=False):
-    plt.rc('text', usetex=True)
+    plt.rc('text', usetex=False)
     plt.rc('font', family='serif')
 
     max_X = 2.0
@@ -696,7 +703,7 @@ def plot_multioutput_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_point
 
 # ASYNCHRONOUS MULTI-OUTPUT (MO)
 def plot_asyn_multioutput_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, q_mean_list, save=False):
-    plt.rc('text', usetex=True)
+    plt.rc('text', usetex=False)
     plt.rc('font', family='serif')
 
     max_X = 1.0
@@ -750,7 +757,7 @@ def plot_asyn_multioutput_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_
         plt.show()
 
 def plot_mocap_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, q_mean_list, save=False):
-    plt.rc('text', usetex=True)
+    plt.rc('text', usetex=False)
     plt.rc('font', family='serif')
 
     max_X = 1.0
@@ -807,7 +814,7 @@ def plot_mocap_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, q_m
 
 # BANANA EXPERIMENT
 def plot_banana_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, max_min, save=False):
-    plt.rc('text', usetex=True)
+    plt.rc('text', usetex=False)
     plt.rc('font', family='serif')
 
     T = len(model_list)
@@ -871,7 +878,7 @@ def plot_banana_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, ma
 
 # CURRENCY EXPERIMENT
 def plot_currency_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, q_mean_list, mean_usd, save=False):
-    plt.rc('text', usetex=True)
+    plt.rc('text', usetex=False)
     plt.rc('font', family='serif')
 
     lik_noise = model_list[0].likelihood.likelihoods_list[0].sigma
@@ -937,7 +944,7 @@ def banana_metrics(model_list, sXtest, sYtest):
     return
 
 def plot_eb2_latex(model_list, sXtrain, sXtest, sYtrain, sYtest, Z_points, q_mean_list, save=False):
-    plt.rc('text', usetex=True)
+    plt.rc('text', usetex=False)
     plt.rc('font', family='serif')
 
     max_X = 1.0

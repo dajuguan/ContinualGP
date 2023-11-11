@@ -7,7 +7,7 @@ from GPy.inference.latent_function_inference import LatentFunctionInference
 from GPy.inference.latent_function_inference.posterior import Posterior
 from GPy.util import choleskies
 from GPy.util import linalg
-from continualgp import util
+import util
 from collections import namedtuple
 from scipy.linalg.blas import dtrmm
 
@@ -218,7 +218,7 @@ class ContinualGPInf(LatentFunctionInference):
         # Derivatives of prior hyperparameters
         # if using Zgrad, dL_dKqq = dVE_dKqq - dKLnew_dKqq + dKLold_dKqq - dKLvar_dKqq
         # otherwise for hyperparameters: dL_dKqq = dVE_dKqq - dKLnew_dKqq
-        dL_dKqq = dVE_dKqq - dKLnew_dKqq #+ dKLold_dKqq - dKLvar_dKqq # dKLold_dKqq sólo para Zgrad, dKLvar_dKqq to be done (for Zgrad)
+        dL_dKqq = dVE_dKqq - dKLnew_dKqq #+ dKLold_dKqq - dKLvar_dKqq # dKLold_dKqq solo para Zgrad, dKLvar_dKqq to be done (for Zgrad)
         dL_dKdq = dVE_dKqd
         dL_dKdiag = dVE_dKdiag
 

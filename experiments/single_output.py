@@ -3,9 +3,12 @@
 
 import warnings
 import os
+import sys
 
 import matplotlib as mpl
-mpl.use('TkAgg')
+mpl.use('agg')
+
+sys.path.append("..")
 
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -22,7 +25,7 @@ from hetmogp.util import vem_algorithm as VEM
 warnings.filterwarnings("ignore")
 os.environ['PATH'] = os.environ['PATH'] + ':/usr/texbin'
 
-N = 2000 # number of samples
+N = 200 # number of samples
 M = 3  # number of inducing points
 Q = 1  # number of latent functions
 T = 10 # number of streaming batches
