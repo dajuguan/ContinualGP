@@ -38,6 +38,7 @@ class Gaussian(Likelihood):
         #samples = np.random.normal(loc=f, size=(num_samples, f.shape[1]))
         return samples
 
+    # Y, m: mu_F, v_F
     def var_exp(self, Y, m, v, gh_points=None, Y_metadata=None):
         # Variational Expectation (Analytical)
         # E_q(fid)[log(p(yi|fid))]
@@ -46,6 +47,7 @@ class Gaussian(Likelihood):
         m = m[:,None]
         v = v[:,None]
         Y = Y[:,None]
+        # print("lik_v.shape:", Y.shape, m.shape, v.shape)
         var_exp = -0.5 * np.log(2 * np.pi) - 0.5 * np.log(lik_v) \
                   - 0.5 * (np.square(Y) + np.square(m) + v - (2 * m * Y)) / lik_v
         return var_exp

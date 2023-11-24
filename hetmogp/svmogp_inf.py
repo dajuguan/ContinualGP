@@ -23,22 +23,23 @@ class SVMOGPInf(LatentFunctionInference):
     def inference(self, q_u_means, q_u_chols, X, Y, Z, kern_list, likelihood, B_list, Y_metadata, KL_scale=1.0,
                   batch_scale=None, predictive=False):
         M = Z.shape[0]
-        T = len(Y)
-        if batch_scale is None:
+        T = len(Y)   # number of outputs, same as D
+        if batch_scale is None:     # use stotistic or not
             batch_scale  = [1.0]*T
         Ntask = []
         [Ntask.append(Y[t].shape[0]) for t in range(T)]
-        Q = len(kern_list)
-        D = likelihood.num_output_functions(Y_metadata)
-        Kuu, Luu, Kuui = util.latent_funs_cov(Z, kern_list)
+        Q = len(kern_list)   # number of  latent functions u
+        D = likelihood.num_output_functions(Y_metadata)  # number of output y_d
+        # assert( T == D)
+        Kuu, Luu, Kuui = util.latent_funs_cov(Z, kern_list) 
         p_U = pu(Kuu=Kuu, Luu=Luu, Kuui=Kuui)
-        q_U = qu(mu_u=q_u_means, chols_u=q_u_chols)
+        q_U = qu(mu_u=q_u_means, chols_u=q_u_chols)    # section 2.2.2
 
         # for every latent function f_d calculate q(f_d) and keep it as q(F):
         q_F = []
         posteriors_F = []
-        f_index = Y_metadata['function_index'].flatten()
-        d_index = Y_metadata['d_index'].flatten()
+        f_index = Y_metadata['function_index'].flatten()   # kinda like [0,1,1], repeat dim_f times for each likelihood
+        d_index = Y_metadata['d_index'].flatten() # kinda like [0, 0, 1, 0,1,2] arange(0, dim_f) for each likelihood
 
         for d in range(D):
             Xtask = X[f_index[d]]

@@ -28,7 +28,7 @@ class HetLikelihood(Likelihood):
         predictions.
         """
         t_index = np.arange(len(self.likelihoods_list))
-        y_index = np.empty((1,1))
+        y_index = np.empty((1,1))  # just for initialize a shape
         f_index = np.empty((1,1))
         d_index = np.empty((1,1))
         p_index = np.empty((1,1))
@@ -102,15 +102,23 @@ class HetLikelihood(Likelihood):
         """
         Returns a list of variational expectations from all likelihoods wrt to parameter functions (PFs) f.
         """
-        t_ind = Y_metadata['task_index'].flatten()
+        t_ind = Y_metadata['task_index'].flatten()  # kinda like [0,1,n], n is the number of likelihoods
         y_ind = Y_metadata['y_index'].flatten()
         f_ind = Y_metadata['function_index'].flatten()
         d_ind = Y_metadata['d_index'].flatten()
         tasks = np.unique(t_ind)
+        assert(len(tasks) == len(Y))
         var_exp = []
+        # print(len(mu_F),len(v_F))
+        # print(Y[0].shape, mu_F[0].shape, v_F[0].shape)
+        # print Y[0][:,0].shape
         for t in tasks:
-
-            ve_task = self.likelihoods_list[t].var_exp(Y[t], mu_F[t], v_F[t], Y_metadata=None)
+            # if type(Y[0]) != list:
+            #     y = Y[0][:,t]
+            # else:
+            #     y = Y[t]
+            y = Y[t]
+            ve_task = self.likelihoods_list[t].var_exp(y, mu_F[t], v_F[t], Y_metadata=None)
             var_exp.append(ve_task)
         return var_exp
 

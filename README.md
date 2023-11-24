@@ -1,4 +1,5 @@
 # Install
+
 ```
 require python=2.7
 conda create -n py27 python=2.7
@@ -7,6 +8,14 @@ pip install -r requirement.txt
 
 python experiments/single_output.py
 ```
+
+# Run
+
+```
+cd experiment
+python xxx.py
+```
+
 # Continual Gaussian Processes
 
 This repository contains the implementation of our Continual (Multi-task)  Gaussian Process model. We provide a detailed code for single-output GP regression, multi-output GP regression, GP classification and long-term continual learning.

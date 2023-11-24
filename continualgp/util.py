@@ -382,7 +382,7 @@ def vem_algorithm(model, vem_iters=None, maxIter_perVEM = None, step_rate=None ,
     #model.elbo = np.empty((vem_iters,1))
 
     if model.batch_size is None:
-
+        print("Optimizating without batch_size.......................")
         for i in range(vem_iters):
             # VARIATIONAL E-STEP
             model['.*.lengthscale'].fix()
@@ -409,7 +409,7 @@ def vem_algorithm(model, vem_iters=None, maxIter_perVEM = None, step_rate=None ,
             print('iteration (' + str(i+1) + ') VM step, ELBO=' + str(model.log_likelihood().flatten()))
 
     else:
-
+        print("Optimizating with batch_size.......................")
         if step_rate is None:
             step_rate = 0.01
 

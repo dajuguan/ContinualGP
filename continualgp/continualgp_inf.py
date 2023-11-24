@@ -236,8 +236,8 @@ class ContinualGPInf(LatentFunctionInference):
 
     def calculate_q_f(self, X, Z, q_U, p_U, kern_list, B, M, N, Q, D, d):
         """
-        Calculates the mean and variance of q(f_d) as
-        Equation: E_q(U)\{p(f_d|U)\}
+        Calculates the mean and variance of  q(f_d) 
+        using the approximate marginal posterior q(fd,j) equation in # 2.2.2
         """
         # Algebra for q(u):
         m_u = q_U.mu_u.copy()
@@ -254,7 +254,7 @@ class ContinualGPInf(LatentFunctionInference):
         Kff_diag = np.diag(Kff)
 
         # Algebra for q(f_d) = E_{q(u)}[p(f_d|u)]
-        Afdu = np.empty((Q, N, M)) #Afdu = K_{fduq}Ki_{uquq}
+        Afdu = np.empty((Q, N, M)) #Afdu = K_{fduq}Ki_{uquq} : i means inverse
         m_fd = np.zeros((N, 1))
         v_fd = np.zeros((N, 1))
         S_fd = np.zeros((N, N))
@@ -262,7 +262,7 @@ class ContinualGPInf(LatentFunctionInference):
         S_fd += Kff
         for q in range(Q):
             # Expectation part
-            R, _ = linalg.dpotrs(np.asfortranarray(Luu[q, :, :]), Kfdu[:, q * M:(q * M) + M].T)
+            R, _ = linalg.dpotrs(np.asfortranarray(Luu[q, :, :]), Kfdu[:, q * M:(q * M) + M].T) # R = Luui * Kfdu
             Afdu[q, :, :] = R.T
             m_fd += np.dot(Afdu[q, :, :], m_u[:, q, None]) #exp
             tmp = dtrmm(alpha=1.0, a=L_u[q, :, :].T, b=R, lower=0, trans_a=0)

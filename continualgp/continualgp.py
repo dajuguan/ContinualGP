@@ -23,6 +23,7 @@ class ContinualGP(GPy.core.SparseGP):
         self.num_inducing = Z.shape[0]  # M
         self.num_latent_funcs = len(kern_list) # Q
         self.num_output_funcs = likelihood.num_output_functions(self.Y_metadata)
+        print("num_output_funcs:", self.num_output_funcs)
         if W_list is None:
             self.W_list, self.kappa_list = util.random_W_kappas(self.num_latent_funcs, self.num_output_funcs, rank=1)
         else:
@@ -62,7 +63,7 @@ class ContinualGP(GPy.core.SparseGP):
 
         inference_method = ContinualGPInf()
 
-        super(ContinualGP, self).__init__(X=Xmulti_batch[0][1:10], Y=Ymulti_batch[0][1:10], Z=Z, kernel=kern_list[0], likelihood=likelihood,
+        super(ContinualGP, self).__init__(X=Xmulti_batch[0], Y=Ymulti_batch[0], Z=Z, kernel=kern_list[0], likelihood=likelihood,
                                      mean_function=None, X_variance=None, inference_method=inference_method,
                                      Y_metadata=Y_metadata, name=name, normalizer=False)
 
@@ -248,13 +249,24 @@ class ContinualGP(GPy.core.SparseGP):
         if kern_list is None:
             kern_list = self.kern_list
 
-        _,_,_,posteriors_F = self.inference_method.inference(q_u_means=self.q_u_means,
-                                                       q_u_chols=self.q_u_chols, X=self.Xmulti_all, Y=self.Ymulti_all, Z=self.Z,
-                                                       kern_list=self.kern_list, likelihood=self.likelihood,
-                                                       B_list=self.B_list, Y_metadata=self.Y_metadata)
+        # _,_,_,posteriors_F = self.inference_method.inference(q_u_means=self.q_u_means,
+        #                                                q_u_chols=self.q_u_chols, X=self.Xmulti_all, Y=self.Ymulti_all, Z=self.Z,
+        #                                                kern_list=self.kern_list, likelihood=self.likelihood,
+        #                                                B_list=self.B_list, Y_metadata=self.Y_metadata)
+
+        posteriors_F = self.inference_method.inference(q_u_means=self.q_u_means, q_u_chols=self.q_u_chols, X=self.Xmulti_all, Y=self.Ymulti_all, Z=self.Z,
+                                                                        Zold=self.Zold, kern_list_old=self.kern_list_old,
+                                                                        kern_list=self.kern_list, likelihood=self.likelihood,
+                                                                        B_list=self.B_list, B_list_old=self.B_list_old,
+                                                                        phi_means=self.phi_means, phi_chols=self.phi_chols,
+                                                                        Y_metadata=self.Y_metadata, batch_scale=self.batch_scale, predictive=True)
+        
         posterior = posteriors_F[output_function_ind]
         Kx= np.zeros((self.Xmulti_all[f_ind[d]].shape[0], Xnew.shape[0]))
         Kxx = np.zeros((Xnew.shape[0], Xnew.shape[0]))
+        print "self.Xmulti_all[f_ind[d]].shape:" 
+        print self.Xmulti_all[f_ind[d]].shape
+        print Xnew.ndim
         for q, B_q in enumerate(self.B_list):
             Kx += B_q.B[output_function_ind, output_function_ind] * kern_list[q].K(self.Xmulti_all[f_ind[d]], Xnew)
             Kxx += B_q.B[output_function_ind, output_function_ind] * kern_list[q].K(Xnew, Xnew)
@@ -275,6 +287,9 @@ class ContinualGP(GPy.core.SparseGP):
 
         Xmulti_all_new = self.Xmulti_all[:]
         Xmulti_all_new[f_ind[d]] = Xnew
+
+        print "predictive_new self.Xmulti_all[f_ind[d]].shape:" 
+        print Xmulti_all_new[f_ind[d]].shape
 
         posteriors_F = self.inference_method.inference(q_u_means=self.q_u_means, q_u_chols=self.q_u_chols, X=Xmulti_all_new, Y=self.Ymulti_all, Z=self.Z,
                                                                         Zold=self.Zold, kern_list_old=self.kern_list_old,

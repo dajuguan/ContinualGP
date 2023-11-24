@@ -38,6 +38,7 @@ class HetLikelihood(Likelihood):
             d_index = np.hstack(( d_index, np.arange(0,dim_f)[None,:] ))
             p_index = np.hstack((p_index, t * np.ones((1, dim_pred))))
 
+        print("----------------------function_index----------------------------",f_index[0,1:], np.int_(f_index[0,1:]).shape)
         metadata = {'task_index': t_index, 'y_index': np.int_(y_index[0,1:]), 'function_index': np.int_(f_index[0,1:]),
                     'd_index': np.int_(d_index[0,1:]),'pred_index': np.int_(p_index[0,1:])}
         return metadata

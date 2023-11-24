@@ -53,7 +53,7 @@ class SVMOGP(GPy.core.SparseGP):
 
         inference_method = SVMOGPInf()
 
-        super(SVMOGP, self).__init__(X=Xmulti_batch[0][1:10], Y=Ymulti_batch[0][1:10], Z=Z, kernel=kern_list[0], likelihood=likelihood,
+        super(SVMOGP, self).__init__(X=Xmulti_batch[0], Y=Ymulti_batch[0], Z=Z, kernel=kern_list[0], likelihood=likelihood,
                                      mean_function=None, X_variance=None, inference_method=inference_method,
                                      Y_metadata=Y_metadata, name=name, normalizer=False)
 
@@ -88,6 +88,7 @@ class SVMOGP(GPy.core.SparseGP):
         T = len(self.likelihood.likelihoods_list)
         self.batch_scale = []
         [self.batch_scale.append(float(self.Xmulti_all[t].shape[0] / self.Xmulti[t].shape[0])) for t in range(T)]
+        self.batch_scale = None
         self._log_marginal_likelihood, gradients, self.posteriors, _ = self.inference_method.inference(q_u_means=self.q_u_means,
                                                                         q_u_chols=self.q_u_chols, X=self.Xmulti, Y=self.Ymulti, Z=self.Z,
                                                                         kern_list=self.kern_list, likelihood=self.likelihood,
@@ -278,6 +279,7 @@ class SVMOGP(GPy.core.SparseGP):
         return mu, np.abs(var) # corregir
 
     def predictive_new(self, Xnew, output_function_ind=None, kern_list=None):
+        print("---------------predictive_new------------------------------")
         f_ind = self.Y_metadata['function_index'].flatten()
         if output_function_ind is None:
             output_function_ind = 0

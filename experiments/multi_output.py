@@ -3,9 +3,12 @@
 
 import warnings
 import os
+import sys
+
+sys.path.append("..")
 
 import matplotlib as mpl
-mpl.use('TkAgg')
+mpl.use('agg')
 
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -21,10 +24,10 @@ from hetmogp.svmogp import SVMOGP
 from hetmogp.util import vem_algorithm as VEM
 
 warnings.filterwarnings("ignore")
-os.environ['PATH'] = os.environ['PATH'] + ':/usr/texbin'
+# os.environ['PATH'] = os.environ['PATH'] + ':/usr/texbin'
 
 
-N = 2000 # number of samples
+N = 200 # number of samples
 M = 5  # number of inducing points
 Q = 2  # number of latent functions
 T = 5 # number of streaming batches
@@ -87,6 +90,8 @@ trueF, trueW_list = true_f_functions(trueU, X)
 # Generating training data Y (sampling from heterogeneous likelihood)
 Y = likelihood.samples(F=trueF, Y_metadata=Y_metadata)
 
+print("------------------y. shape---------------------------------", len(Y), Y[0].shape)
+
 # Streaming data generator
 def data_streaming(Y_output, X_input, T_sections):
     streaming_Y = []
@@ -108,6 +113,8 @@ def data_streaming(Y_output, X_input, T_sections):
 
 # Streaming simulation data
 stream_Y, stream_X = data_streaming(Y, X, T)
+
+print("------------------stream_Y. shape---------------------------------", len(stream_Y), len(stream_Y[0]), stream_Y[0][0].shape)
 
 # Train/test splitting
 stream_Y_train = []
@@ -155,7 +162,7 @@ for t_it in range(iterations):
 
     # t=1 ---------------------- First Stream: D_1 --------------------
     # HetMOGP Model
-    print("[Stream 1] ---------------------------------")
+    print("[Stream 1] ---------------------------------", len(stream_X[0]), stream_X[0][0].shape, len(stream_Y[0]), stream_Y[0][0].shape)
     hetmogp_model = SVMOGP(X=stream_X[0], Y=stream_Y[0], Z=Z, kern_list=kern_list, likelihood=likelihood, Y_metadata=Y_metadata, W_list=trueW_list)
     hetmogp_model = VEM(hetmogp_model, stochastic=False, vem_iters=3, optZ=False, verbose=False, verbose_plot=False, non_chained=False)
 
@@ -200,7 +207,7 @@ for t_it in range(iterations):
 
 
     # Latex Plots
-    util.plot_multioutput_latex(model_list, stream_X_train, stream_X_test, stream_Y_train, stream_Y_test, Z_list, q_mean_list, save=False)
+    # util.plot_multioutput_latex(model_list, stream_X_train, stream_X_test, stream_Y_train, stream_Y_test, Z_list, q_mean_list, save=False)
 
     for t_step in range(T):
         for d in range(D):
